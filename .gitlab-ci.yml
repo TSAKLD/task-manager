@@ -1,0 +1,17 @@
+image: golang:1.22
+stages:
+  - building
+  - testing
+  - deploying
+
+build-app:
+  stage: building
+  script: go build .
+
+run-tests:
+  stage: testing
+  script: go test -v ./...
+
+deploy:
+  stage: deploying
+  script: echo 'Hi from deploy'
