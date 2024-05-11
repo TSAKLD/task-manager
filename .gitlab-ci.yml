@@ -16,9 +16,9 @@ run-tests:
     POSTGRES_PASSWORD: postgres
     DB_HOST: postgres
     DB_PORT: 5432
-  before_script: go install github.com/pressly/goose/v3/cmd/goose@latest && \
-    $GOPATH/bin/goose -dir migrations postgres "user=postgres host=postgres port=5432 password=postgres dbname=postgres sslmode=disable"  up
-  script:  go test -v ./...
+  before_script: go install github.com/pressly/goose/v3/cmd/goose@latest
+  script: goose -dir migrations postgres "user=postgres host=postgres port=5432 password=postgres dbname=postgres sslmode=disable"  up && go test -v ./...
+
 
 
 deploy:
