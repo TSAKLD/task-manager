@@ -14,6 +14,8 @@ run-tests:
     - postgres:16.2
   variables:
     POSTGRES_PASSWORD: postgres
+    DB_HOST: postgres
+    DB_PORT: 5432
   script: go test -v ./...
 
 deploy:
