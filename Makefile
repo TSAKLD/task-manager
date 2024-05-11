@@ -14,7 +14,7 @@ migrate-down:
 
 run-tests:
 	docker rm -f db_test || true
-	docker run --name --rm db_test -e TZ=UTC -p "5433:5432" -e POSTGRES_PASSWORD=postgres -d postgres:16.2 && \
+	docker run --name db_test --rm -e TZ=UTC -p "5433:5432" -e POSTGRES_PASSWORD=postgres -d postgres:16.2 && \
 	timeout 3 && \
 	goose -dir migrations postgres "user=postgres host=localhost port=5433 password=postgres dbname=postgres sslmode=disable"  up && \
 	go test ./...

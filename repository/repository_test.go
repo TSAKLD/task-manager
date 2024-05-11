@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"os"
 	"restAPI/bootstrap"
 	"restAPI/entity"
 	"testing"
@@ -13,17 +15,7 @@ import (
 var eCtx = context.Background()
 
 func TestRepository_CreateUser(t *testing.T) {
-	cfg := &bootstrap.Config{
-		DBHost:     "localhost",
-		DBPort:     "5433",
-		DBUser:     "postgres",
-		DBPassword: "postgres",
-		DBName:     "postgres",
-	}
-
-	db, err := bootstrap.DBConnect(cfg)
-	require.NoError(t, err)
-	defer db.Close()
+	db := GetDB(t)
 
 	userRepo := NewUserRepository(db)
 	authRepo := NewAuthRepository(db)
@@ -36,7 +28,7 @@ func TestRepository_CreateUser(t *testing.T) {
 		IsVerified: true,
 	}
 	// Create user
-	user, err = userRepo.CreateUser(eCtx, user)
+	user, err := userRepo.CreateUser(eCtx, user)
 	require.NoError(t, err)
 
 	// Get user by email && password
@@ -71,22 +63,12 @@ func TestRepository_CreateUser(t *testing.T) {
 }
 
 func TestRepository_Users_Error(t *testing.T) {
-	cfg := &bootstrap.Config{
-		DBHost:     "localhost",
-		DBPort:     "5433",
-		DBUser:     "postgres",
-		DBPassword: "postgres",
-		DBName:     "postgres",
-	}
-
-	db, err := bootstrap.DBConnect(cfg)
-	require.NoError(t, err)
-	defer db.Close()
+	db := GetDB(t)
 
 	authRepo := NewAuthRepository(db)
 	userRepo := NewUserRepository(db)
 
-	_, err = authRepo.UserByEmailAndPassword(eCtx, uuid.NewString(), uuid.NewString())
+	_, err := authRepo.UserByEmailAndPassword(eCtx, uuid.NewString(), uuid.NewString())
 	require.ErrorIs(t, err, entity.ErrNotFound)
 
 	_, err = userRepo.UserByID(eCtx, time.Now().UnixNano())
@@ -117,17 +99,7 @@ func TestRepository_Users_Error(t *testing.T) {
 }
 
 func TestRepository_CreateProject(t *testing.T) {
-	cfg := &bootstrap.Config{
-		DBHost:     "localhost",
-		DBPort:     "5433",
-		DBUser:     "postgres",
-		DBPassword: "postgres",
-		DBName:     "postgres",
-	}
-
-	db, err := bootstrap.DBConnect(cfg)
-	require.NoError(t, err)
-	defer db.Close()
+	db := GetDB(t)
 
 	userRepo := NewUserRepository(db)
 	repo := NewProjectRepository(db)
@@ -140,7 +112,7 @@ func TestRepository_CreateProject(t *testing.T) {
 		CreatedAt: time.Now().UTC().Round(time.Millisecond),
 	}
 
-	user, err = userRepo.CreateUser(eCtx, user)
+	user, err := userRepo.CreateUser(eCtx, user)
 	require.NoError(t, err)
 
 	actualProject := entity.Project{
@@ -172,21 +144,11 @@ func TestRepository_CreateProject(t *testing.T) {
 }
 
 func TestRepository_Projects_Error(t *testing.T) {
-	cfg := &bootstrap.Config{
-		DBHost:     "localhost",
-		DBPort:     "5433",
-		DBUser:     "postgres",
-		DBPassword: "postgres",
-		DBName:     "postgres",
-	}
-
-	db, err := bootstrap.DBConnect(cfg)
-	require.NoError(t, err)
-	defer db.Close()
+	db := GetDB(t)
 
 	repo := NewProjectRepository(db)
 
-	_, err = repo.CreateProject(eCtx, entity.Project{})
+	_, err := repo.CreateProject(eCtx, entity.Project{})
 	require.Error(t, err)
 
 	_, err = repo.ProjectByID(eCtx, time.Now().UnixNano())
@@ -202,17 +164,7 @@ func TestRepository_Projects_Error(t *testing.T) {
 }
 
 func TestRepository_CreateTask(t *testing.T) {
-	cfg := &bootstrap.Config{
-		DBHost:     "localhost",
-		DBPort:     "5433",
-		DBUser:     "postgres",
-		DBPassword: "postgres",
-		DBName:     "postgres",
-	}
-
-	db, err := bootstrap.DBConnect(cfg)
-	require.NoError(t, err)
-	defer db.Close()
+	db := GetDB(t)
 
 	userRepo := NewUserRepository(db)
 	repo := NewProjectRepository(db)
@@ -226,7 +178,7 @@ func TestRepository_CreateTask(t *testing.T) {
 		CreatedAt: time.Now().UTC().Round(time.Millisecond),
 	}
 
-	user, err = userRepo.CreateUser(eCtx, user)
+	user, err := userRepo.CreateUser(eCtx, user)
 	require.NoError(t, err)
 
 	actualProject := entity.Project{
@@ -310,4 +262,35 @@ func TestRepository_CreateTask(t *testing.T) {
 
 	_, err = task.UserTasks(eCtx, time.Now().UnixNano())
 	require.Error(t, err)
+}
+
+func GetDB(t *testing.T) *sql.DB {
+	t.Helper()
+
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
+	}
+
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "5433"
+	}
+
+	cfg := &bootstrap.Config{
+		DBHost:     dbHost,
+		DBPort:     dbPort,
+		DBUser:     "postgres",
+		DBPassword: "postgres",
+		DBName:     "postgres",
+	}
+
+	db, err := bootstrap.DBConnect(cfg)
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		db.Close()
+	})
+
+	return db
 }

@@ -10,6 +10,10 @@ build-app:
 
 run-tests:
   stage: testing
+  services:
+    - postgres:16.2
+  variables:
+    POSTGRES_PASSWORD: postgres
   script: go test -v ./...
 
 deploy:
