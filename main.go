@@ -19,7 +19,7 @@ func main() {
 		log.Fatal("Problem with config validation: ", errorList)
 	}
 
-	kafkaConn, err := bootstrap.KafkaConnect("localhost:9092", "create-user")
+	kafkaConn, err := bootstrap.KafkaConnect(cfg.KafkaAddr, cfg.KafkaTopic)
 	if err != nil {
 		log.Fatal("Problem with Kafka connection: ", err)
 	}
@@ -50,7 +50,7 @@ func main() {
 
 	userServ := service.NewUserService(cache, authRepo, projRepo)
 	authServ := service.NewAuthService(authRepo, userRepo, kafkaConn)
-	projServ := service.NewProjectRepository(projRepo, taskRepo)
+	projServ := service.NewProjectRepository(projRepo, taskRepo, userRepo, kafkaConn)
 
 	taskHandler := api.NewTaskHandler(projServ)
 	projectHandler := api.NewProjectHandler(projServ)

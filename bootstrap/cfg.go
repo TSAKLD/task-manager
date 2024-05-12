@@ -16,6 +16,9 @@ type Config struct {
 	HTTPPort string
 
 	RedisAddr string
+
+	KafkaAddr  string
+	KafkaTopic string
 }
 
 func NewConfig() (*Config, error) {
@@ -30,10 +33,12 @@ func NewConfig() (*Config, error) {
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASS"),
 		DBName:     os.Getenv("DB_NAME"),
-
-		HTTPPort: os.Getenv("HTTP_PORT"),
+		HTTPPort:   os.Getenv("HTTP_PORT"),
 
 		RedisAddr: os.Getenv("REDIS_ADDR"),
+
+		KafkaAddr:  os.Getenv("KAFKA_ADDR"),
+		KafkaTopic: os.Getenv("KAFKA_TOPIC"),
 	}, nil
 }
 
@@ -72,6 +77,16 @@ func (c *Config) Validate() []error {
 
 	if c.RedisAddr == "" {
 		err := errors.New("invalid Redis host field \n")
+		errorList = append(errorList, err)
+	}
+
+	if c.KafkaAddr == "" {
+		err := errors.New("invalid Kafka address field \n")
+		errorList = append(errorList, err)
+	}
+
+	if c.KafkaTopic == "" {
+		err := errors.New("invalid Kafka topic field \n")
 		errorList = append(errorList, err)
 	}
 

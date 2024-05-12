@@ -48,7 +48,8 @@ func (s *Server) setRoutes() {
 	s.router.Handle("GET /projects", s.mw.Auth(s.projHdr.UserProjects))
 	s.router.Handle("GET /projects/{id}", s.mw.Auth(s.projHdr.ProjectByID))
 	//s.router.HandleFunc("POST /projects", s.h.EditProject)
-	s.router.Handle("POST /projects/users", s.mw.Auth(s.projHdr.AddProjectUser))
+	s.router.HandleFunc("GET /projects/invite", s.projHdr.AcceptProjectInvitation)
+	s.router.Handle("POST /projects/invite", s.mw.Auth(s.projHdr.InviteMember))
 
 	// task routes
 	s.router.Handle("POST /tasks", s.mw.Auth(s.taskHdr.CreateTask))

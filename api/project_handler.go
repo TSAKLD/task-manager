@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"restAPI/entity"
 	"strconv"
@@ -11,10 +12,14 @@ import (
 
 type ProjectService interface {
 	CreateProject(ctx context.Context, project entity.Project) (entity.Project, error)
+	DeleteProject(ctx context.Context, projectID int64) error
+
 	ProjectByID(ctx context.Context, id int64) (entity.Project, error)
 	UserProjects(ctx context.Context) ([]entity.Project, error)
-	DeleteProject(ctx context.Context, projectID int64) error
-	AddProjectMember(ctx context.Context, projectID int64, userID int64) error
+
+	AddProjectMember(ctx context.Context, code string) error
+	InviteMemberRequest(ctx context.Context, projectID int64, email string) error
+	SendInvite(ctx context.Context, email string, code string, projectName string) error
 }
 
 type ProjectHandler struct {
@@ -95,13 +100,27 @@ func (h *ProjectHandler) DeleteProject(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-type AddProjectUserRequest struct {
-	ProjectID int64 `json:"project_id"`
-	UserID    int64 `json:"user_id"`
+type InviteMemberRequest struct {
+	ProjectID int64  `json:"project_id"`
+	Email     string `json:"email"`
 }
 
-func (h *ProjectHandler) AddProjectUser(w http.ResponseWriter, r *http.Request) {
-	var request AddProjectUserRequest
+func (h *ProjectHandler) AcceptProjectInvitation(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+
+	ctx := r.Context()
+
+	err := h.project.AddProjectMember(ctx, code)
+	if err != nil {
+		sendError(w, err)
+		return
+	}
+
+	fmt.Fprint(w, "Invitation Accepted")
+}
+
+func (h *ProjectHandler) InviteMember(w http.ResponseWriter, r *http.Request) {
+	var request InviteMemberRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		sendError(w, err)
@@ -110,11 +129,11 @@ func (h *ProjectHandler) AddProjectUser(w http.ResponseWriter, r *http.Request) 
 
 	ctx := r.Context()
 
-	err = h.project.AddProjectMember(ctx, request.ProjectID, request.UserID)
+	err = h.project.InviteMemberRequest(ctx, request.ProjectID, request.Email)
 	if err != nil {
 		sendError(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 }

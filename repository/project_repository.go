@@ -88,12 +88,20 @@ func (r *ProjectRepository) DeleteProject(ctx context.Context, projectID int64) 
 	return nil
 }
 
-func (r *ProjectRepository) AddProjectMember(ctx context.Context, projectID int64, userID int64) error {
+func (r *ProjectRepository) AddProjectMember(ctx context.Context, code string) error {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
+
+	q := "SELECT project_id, user_id FROM invitation_codes WHERE code = $1"
+
+	var projectID, userID int64
+	err = tx.QueryRowContext(ctx, q, code).Scan(&projectID, &userID)
+	if err != nil {
+		return err
+	}
 
 	err = r.addProjectMember(ctx, tx, projectID, userID)
 	if err != nil {
@@ -104,7 +112,7 @@ func (r *ProjectRepository) AddProjectMember(ctx context.Context, projectID int6
 }
 
 func (r *ProjectRepository) addProjectMember(ctx context.Context, tx *sql.Tx, projectID int64, userID int64) error {
-	q := "INSERT INTO projects_users(project_id, user_id) VALUES ($1, $2)"
+	q := "INSERT INTO projects_users(project_id, user_id) VALUES ($1, $2) ON CONFLICT(project_id, user_id) DO NOTHING"
 
 	_, err := tx.ExecContext(ctx, q, projectID, userID)
 	if err != nil {
@@ -112,4 +120,11 @@ func (r *ProjectRepository) addProjectMember(ctx context.Context, tx *sql.Tx, pr
 	}
 
 	return nil
+}
+
+func (r *ProjectRepository) SaveInvitationCode(ctx context.Context, code string, userID int64, projectID int64) error {
+	q := "INSERT INTO invitation_codes(code, user_id, project_id) VALUES ($1, $2, $3)"
+
+	_, err := r.db.ExecContext(ctx, q, code, userID, projectID)
+	return err
 }
