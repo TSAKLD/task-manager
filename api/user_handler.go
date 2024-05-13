@@ -14,6 +14,8 @@ type UserService interface {
 	ProjectUsers(ctx context.Context, projectID int64) ([]entity.User, error)
 
 	DeleteUser(ctx context.Context, id int64) error
+
+	SendVIPNotification()
 }
 
 type UserHandler struct {

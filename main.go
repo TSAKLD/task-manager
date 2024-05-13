@@ -48,7 +48,7 @@ func main() {
 
 	cache := repository.NewRedisCache(userRepo, client)
 
-	userServ := service.NewUserService(cache, authRepo, projRepo)
+	userServ := service.NewUserService(cache, authRepo, projRepo, kafkaConn)
 	authServ := service.NewAuthService(authRepo, userRepo, kafkaConn)
 	projServ := service.NewProjectRepository(projRepo, taskRepo, userRepo, kafkaConn)
 
@@ -60,6 +60,8 @@ func main() {
 	mw := api.NewMiddleware(authServ)
 
 	server := api.NewServer(taskHandler, projectHandler, userHandler, authHandler, cfg.HTTPPort, mw)
+
+	go userServ.SendVIPNotification()
 
 	err = server.Start()
 	if err != nil {

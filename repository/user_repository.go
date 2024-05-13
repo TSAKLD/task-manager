@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"restAPI/entity"
+	"time"
 )
 
 type UserRepository struct {
@@ -114,4 +115,35 @@ func (r *UserRepository) ProjectUsers(ctx context.Context, projectID int64) (use
 	}
 
 	return users, nil
+}
+
+func (r *UserRepository) IsNotified(ctx context.Context, email string, subject string) error {
+	q := "SELECT email, subject FROM email_notifications WHERE email = $1 AND subject = $2"
+
+	err := r.db.QueryRowContext(ctx, q, email, subject).Scan(&email, &subject)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entity.ErrNotFound
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (r *UserRepository) MarkNotification(ctx context.Context, email string, subject string) error {
+	q := "INSERT INTO email_notifications (email, subject, created_at) VALUES($1, $2, $3)"
+
+	_, err := r.db.ExecContext(ctx, q, email, subject, time.Now())
+	if err != nil {
+		return err
+	}
+
+	q = "UPDATE users SET vip_status = $1 WHERE email = $2"
+	_, err = r.db.ExecContext(ctx, q, "active", email)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
