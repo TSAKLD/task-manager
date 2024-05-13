@@ -77,16 +77,12 @@ func (r *RedisCache) UserByEmail(ctx context.Context, email string) (u entity.Us
 	return r.user.UserByEmail(ctx, email)
 }
 
-func (r *RedisCache) Users(ctx context.Context) (users []entity.User, err error) {
-	return r.user.Users(ctx)
+func (r *RedisCache) UsersToSendVIP(ctx context.Context) (users []entity.User, err error) {
+	return r.user.UsersToSendVIP(ctx)
 }
 
 func (r *RedisCache) ProjectUsers(ctx context.Context, projectID int64) (users []entity.User, err error) {
 	return r.user.ProjectUsers(ctx, projectID)
-}
-
-func (r *RedisCache) IsNotified(ctx context.Context, email string, notification string) error {
-	return r.user.IsNotified(ctx, email, notification)
 }
 
 func (r *RedisCache) MarkNotification(ctx context.Context, email string, notification string) error {

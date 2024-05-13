@@ -24,7 +24,7 @@ func TestRepository_CreateUser(t *testing.T) {
 		Name:       uuid.NewString(),
 		Password:   uuid.NewString(),
 		Email:      uuid.NewString(),
-		CreatedAt:  time.Now().UTC().Round(time.Millisecond),
+		CreatedAt:  time.Now().UTC().Round(time.Millisecond).Add(-time.Hour * 24 * 32),
 		IsVerified: true,
 	}
 	// Create user
@@ -50,7 +50,7 @@ func TestRepository_CreateUser(t *testing.T) {
 	require.Equal(t, user, user2)
 
 	// Get users
-	users, err := userRepo.Users(eCtx)
+	users, err := userRepo.UsersToSendVIP(eCtx)
 	require.NoError(t, err)
 	require.Contains(t, users, user)
 
@@ -85,7 +85,7 @@ func TestRepository_Users_Error(t *testing.T) {
 	err = userRepo.DeleteUser(eCtx, time.Now().UnixNano())
 	require.Error(t, err)
 
-	_, err = userRepo.Users(eCtx)
+	_, err = userRepo.UsersToSendVIP(eCtx)
 	require.Error(t, err)
 
 	_, err = authRepo.UserByEmailAndPassword(eCtx, uuid.NewString(), uuid.NewString())

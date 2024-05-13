@@ -3,12 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/segmentio/kafka-go"
 	"log"
 	"restAPI/entity"
-	"time"
 )
 
 type UserRepository interface {
@@ -17,10 +15,9 @@ type UserRepository interface {
 
 	UserByID(ctx context.Context, id int64) (u entity.User, err error)
 	UserByEmail(ctx context.Context, email string) (u entity.User, err error)
-	Users(ctx context.Context) (users []entity.User, err error)
+	UsersToSendVIP(ctx context.Context) (users []entity.User, err error)
 	ProjectUsers(ctx context.Context, projectID int64) (users []entity.User, err error)
 
-	IsNotified(ctx context.Context, email string, notification string) error
 	MarkNotification(ctx context.Context, email string, notification string) error
 }
 
@@ -63,15 +60,6 @@ func (us *UserService) DeleteUser(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (us *UserService) Users(ctx context.Context) ([]entity.User, error) {
-	users, err := us.user.Users(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return users, nil
-}
-
 func (us *UserService) ProjectUsers(ctx context.Context, projectID int64) ([]entity.User, error) {
 	user := entity.AuthUser(ctx)
 
@@ -101,49 +89,35 @@ func (us *UserService) ProjectUsers(ctx context.Context, projectID int64) ([]ent
 	return users, nil
 }
 
-func (us *UserService) SendVIPNotification() {
-	ctx := context.Background()
+func (us *UserService) SendVIPNotification(ctx context.Context) error {
 	ntf := entity.Notification{
 		Subject:  "status update",
 		Receiver: "",
 		Message:  "You are VIP client now",
 	}
 
-	for {
-		users, err := us.user.Users(ctx)
-		if err != nil {
-			log.Println(err)
-		}
-
-		for _, v := range users {
-			if time.Now().Sub(v.CreatedAt).Hours() > 744 {
-				ntf.Receiver = v.Email
-
-				err := us.user.IsNotified(ctx, ntf.Receiver, ntf.Subject)
-				if err != nil {
-					if errors.Is(err, entity.ErrNotFound) {
-						err = us.user.MarkNotification(ctx, ntf.Receiver, ntf.Subject)
-						if err != nil {
-							log.Println(err)
-						}
-
-						err = us.sendNotification(ctx, ntf)
-						if err != nil {
-							log.Println(err)
-						}
-
-						log.Println(fmt.Sprintf("%s: status update : %s", ntf.Receiver, ntf.Message))
-
-						continue
-					}
-
-					log.Println(err)
-				}
-			}
-		}
-
-		time.Sleep(time.Minute)
+	users, err := us.user.UsersToSendVIP(ctx)
+	if err != nil {
+		return err
 	}
+
+	for _, v := range users {
+		ntf.Receiver = v.Email
+
+		err = us.user.MarkNotification(ctx, ntf.Receiver, ntf.Subject)
+		if err != nil {
+			return err
+		}
+
+		err = us.sendNotification(ctx, ntf)
+		if err != nil {
+			return err
+		}
+
+		log.Println(fmt.Sprintf("%s: status update : %s", ntf.Receiver, ntf.Message))
+	}
+
+	return nil
 }
 
 func (us *UserService) sendNotification(ctx context.Context, ntf entity.Notification) error {

@@ -34,7 +34,6 @@ func (s *Server) setRoutes() {
 	s.router.HandleFunc("DELETE /users/{id}", s.userHdr.DeleteUser)
 	//s.router.HandleFunc("DELETE /users/{id}", s.h.EditUser)
 	s.router.HandleFunc("GET /users/{id}", s.userHdr.UserByID)
-	s.router.HandleFunc("GET /users", s.userHdr.Users)
 	s.router.Handle("GET /projects/{project_id}/users", s.mw.Auth(s.userHdr.ProjectUsers))
 
 	// auth routes

@@ -68,8 +68,10 @@ func (r *UserRepository) UserByEmail(ctx context.Context, email string) (u entit
 	return u, nil
 }
 
-func (r *UserRepository) Users(ctx context.Context) (users []entity.User, err error) {
-	q := "SELECT id, name, email, created_at, is_verified FROM users"
+func (r *UserRepository) UsersToSendVIP(ctx context.Context) (users []entity.User, err error) {
+	q := `SELECT u.id, u.name, u.email, u.created_at, u.is_verified 
+	FROM users u LEFT JOIN email_notifications en ON u.email = en.email 
+	WHERE u.created_at < NOW()-INTERVAL '1 month' AND (en.subject != 'status update' OR en.subject IS NULL)`
 
 	rows, err := r.db.QueryContext(ctx, q)
 	if err != nil {
@@ -117,30 +119,27 @@ func (r *UserRepository) ProjectUsers(ctx context.Context, projectID int64) (use
 	return users, nil
 }
 
-func (r *UserRepository) IsNotified(ctx context.Context, email string, subject string) error {
-	q := "SELECT email, subject FROM email_notifications WHERE email = $1 AND subject = $2"
-
-	err := r.db.QueryRowContext(ctx, q, email, subject).Scan(&email, &subject)
+func (r *UserRepository) MarkNotification(ctx context.Context, email string, subject string) error {
+	tx, err := r.db.Begin()
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return entity.ErrNotFound
-		}
 		return err
 	}
+	defer tx.Rollback()
 
-	return nil
-}
-
-func (r *UserRepository) MarkNotification(ctx context.Context, email string, subject string) error {
 	q := "INSERT INTO email_notifications (email, subject, created_at) VALUES($1, $2, $3)"
 
-	_, err := r.db.ExecContext(ctx, q, email, subject, time.Now())
+	_, err = tx.ExecContext(ctx, q, email, subject, time.Now())
 	if err != nil {
 		return err
 	}
 
 	q = "UPDATE users SET vip_status = $1 WHERE email = $2"
-	_, err = r.db.ExecContext(ctx, q, "active", email)
+	_, err = tx.ExecContext(ctx, q, "active", email)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}

@@ -10,12 +10,9 @@ import (
 
 type UserService interface {
 	UserByID(ctx context.Context, id int64) (entity.User, error)
-	Users(ctx context.Context) ([]entity.User, error)
 	ProjectUsers(ctx context.Context, projectID int64) ([]entity.User, error)
 
 	DeleteUser(ctx context.Context, id int64) error
-
-	SendVIPNotification()
 }
 
 type UserHandler struct {
@@ -64,18 +61,6 @@ func (h *UserHandler) UserByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendResponse(w, user)
-}
-
-func (h *UserHandler) Users(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	users, err := h.user.Users(ctx)
-	if err != nil {
-		sendError(w, err)
-		return
-	}
-
-	sendResponse(w, users)
 }
 
 func (h *UserHandler) ProjectUsers(w http.ResponseWriter, r *http.Request) {

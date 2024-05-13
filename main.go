@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"restAPI/api"
 	"restAPI/bootstrap"
 	"restAPI/repository"
 	"restAPI/service"
+	"time"
 )
 
 func main() {
@@ -61,7 +63,16 @@ func main() {
 
 	server := api.NewServer(taskHandler, projectHandler, userHandler, authHandler, cfg.HTTPPort, mw)
 
-	go userServ.SendVIPNotification()
+	go func() {
+		for {
+			err := userServ.SendVIPNotification(context.Background())
+			if err != nil {
+				log.Println(err)
+			}
+
+			time.Sleep(time.Minute)
+		}
+	}()
 
 	err = server.Start()
 	if err != nil {
