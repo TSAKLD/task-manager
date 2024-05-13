@@ -116,7 +116,7 @@ func (us *UserService) SendVIPNotification() {
 		}
 
 		for _, v := range users {
-			if time.Now().Sub(v.CreatedAt).Hours() > 1 {
+			if time.Now().Sub(v.CreatedAt).Hours() > 744 {
 				ntf.Receiver = v.Email
 
 				err := us.user.IsNotified(ctx, ntf.Receiver, ntf.Subject)
