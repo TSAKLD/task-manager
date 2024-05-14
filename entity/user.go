@@ -2,6 +2,7 @@ package entity
 
 import (
 	"context"
+	"errors"
 	"time"
 )
 
@@ -16,4 +17,26 @@ type User struct {
 
 func AuthUser(ctx context.Context) User {
 	return ctx.Value("user").(User)
+}
+
+type UserToCreate struct {
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
+func (utc *UserToCreate) Validate() error {
+	if utc.Name == "" {
+		return errors.New("invalid name field")
+	}
+
+	if utc.Password == "" {
+		return errors.New("invalid password field")
+	}
+
+	if utc.Email == "" {
+		return errors.New("invalid email field")
+	}
+
+	return nil
 }

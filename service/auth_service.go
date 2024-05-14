@@ -33,20 +33,26 @@ func NewAuthService(auth AuthRepository, user UserRepository, kafkaConn *kafka.C
 	}
 }
 
-func (us *AuthService) RegisterUser(ctx context.Context, user entity.User) (entity.User, error) {
-	_, err := us.user.UserByEmail(ctx, user.Email)
+func (us *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCreate) (entity.User, error) {
+	_, err := us.user.UserByEmail(ctx, userTC.Email)
 	if err == nil {
-		return entity.User{}, fmt.Errorf("email %s already exist", user.Email)
+		return entity.User{}, fmt.Errorf("email %s already exist", userTC.Email)
 	}
 
-	user.CreatedAt = time.Now()
+	user := entity.User{
+		Name:       userTC.Name,
+		Password:   userTC.Password,
+		Email:      userTC.Email,
+		CreatedAt:  time.Now(),
+		IsVerified: false,
+	}
 
 	user, err = us.user.CreateUser(ctx, user)
 	if err != nil {
 		return entity.User{}, err
 	}
 
-	user.Password = ""
+	userTC.Password = ""
 
 	code := uuid.NewString()
 

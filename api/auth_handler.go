@@ -11,7 +11,7 @@ import (
 )
 
 type AuthService interface {
-	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
+	RegisterUser(ctx context.Context, userTC entity.UserToCreate) (entity.User, error)
 	Login(ctx context.Context, email string, password string) (uuid.UUID, error)
 	Verify(ctx context.Context, code string) error
 	UserBySessionID(ctx context.Context, sessionID string) (entity.User, error)
@@ -29,15 +29,21 @@ func NewAuthHandler(auth AuthService) *AuthHandler {
 func (h *AuthHandler) Registration(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var user entity.User
+	var userToCreate entity.UserToCreate
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&userToCreate)
 	if err != nil {
 		sendError(ctx, w, err)
 		return
 	}
 
-	user, err = h.auth.RegisterUser(ctx, user)
+	err = userToCreate.Validate()
+	if err != nil {
+		sendError(ctx, w, err)
+		return
+	}
+
+	user, err := h.auth.RegisterUser(ctx, userToCreate)
 	if err != nil {
 		sendError(ctx, w, err)
 		return
