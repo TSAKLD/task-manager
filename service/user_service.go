@@ -47,9 +47,15 @@ func (us *UserService) UserByID(ctx context.Context, id int64) (entity.User, err
 }
 
 func (us *UserService) DeleteUser(ctx context.Context, id int64) error {
+	requester := entity.AuthUser(ctx)
+
 	_, err := us.user.UserByID(ctx, id)
 	if err != nil {
 		return err
+	}
+
+	if requester.ID != id {
+		return entity.ErrForbidden
 	}
 
 	err = us.user.DeleteUser(ctx, id)

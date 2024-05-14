@@ -23,6 +23,8 @@ func sendError(ctx context.Context, w http.ResponseWriter, err error) {
 	statusCode := http.StatusInternalServerError
 
 	switch {
+	case errors.Is(err, entity.ErrBadRequest):
+		statusCode = http.StatusBadRequest
 	case errors.Is(err, entity.ErrNotFound):
 		statusCode = http.StatusNotFound
 	case errors.Is(err, entity.ErrUnauthorized):

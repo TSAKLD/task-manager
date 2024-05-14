@@ -43,13 +43,13 @@ func NewProjectRepository(project ProjectRepository, task TaskRepository, user U
 	}
 }
 
-func (us *ProjectService) CreateProject(ctx context.Context, project entity.Project) (entity.Project, error) {
+func (ps *ProjectService) CreateProject(ctx context.Context, project entity.Project) (entity.Project, error) {
 	user := entity.AuthUser(ctx)
 
 	project.UserID = user.ID
 	project.CreatedAt = time.Now()
 
-	project, err := us.project.CreateProject(ctx, project)
+	project, err := ps.project.CreateProject(ctx, project)
 	if err != nil {
 		return entity.Project{}, err
 	}
@@ -57,10 +57,10 @@ func (us *ProjectService) CreateProject(ctx context.Context, project entity.Proj
 	return project, nil
 }
 
-func (us *ProjectService) ProjectByID(ctx context.Context, id int64) (entity.Project, error) {
+func (ps *ProjectService) ProjectByID(ctx context.Context, id int64) (entity.Project, error) {
 	user := entity.AuthUser(ctx)
 
-	project, err := us.project.ProjectByID(ctx, id)
+	project, err := ps.project.ProjectByID(ctx, id)
 	if err != nil {
 		return entity.Project{}, err
 	}
@@ -72,15 +72,15 @@ func (us *ProjectService) ProjectByID(ctx context.Context, id int64) (entity.Pro
 	return project, nil
 }
 
-func (us *ProjectService) UserProjects(ctx context.Context) ([]entity.Project, error) {
+func (ps *ProjectService) UserProjects(ctx context.Context) ([]entity.Project, error) {
 	user := entity.AuthUser(ctx)
-	return us.project.UserProjects(ctx, user.ID)
+	return ps.project.UserProjects(ctx, user.ID)
 }
 
-func (us *ProjectService) DeleteProject(ctx context.Context, projectID int64) error {
+func (ps *ProjectService) DeleteProject(ctx context.Context, projectID int64) error {
 	user := entity.AuthUser(ctx)
 
-	project, err := us.project.ProjectByID(ctx, projectID)
+	project, err := ps.project.ProjectByID(ctx, projectID)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (us *ProjectService) DeleteProject(ctx context.Context, projectID int64) er
 		return fmt.Errorf("%w: not your project", entity.ErrForbidden)
 	}
 
-	err = us.project.DeleteProject(ctx, projectID)
+	err = ps.project.DeleteProject(ctx, projectID)
 	if err != nil {
 		return err
 	}
@@ -97,8 +97,8 @@ func (us *ProjectService) DeleteProject(ctx context.Context, projectID int64) er
 	return nil
 }
 
-func (us *ProjectService) CreateTask(ctx context.Context, cTask entity.TaskToCreate) (entity.Task, error) {
-	project, err := us.project.ProjectByID(ctx, cTask.ProjectID)
+func (ps *ProjectService) CreateTask(ctx context.Context, cTask entity.TaskToCreate) (entity.Task, error) {
+	project, err := ps.project.ProjectByID(ctx, cTask.ProjectID)
 	if err != nil {
 		return entity.Task{}, err
 	}
@@ -117,13 +117,13 @@ func (us *ProjectService) CreateTask(ctx context.Context, cTask entity.TaskToCre
 		CreatedAt:   time.Now(),
 	}
 
-	return us.task.CreateTask(ctx, task)
+	return ps.task.CreateTask(ctx, task)
 }
 
-func (us *ProjectService) TaskByID(ctx context.Context, id int64) (entity.Task, error) {
+func (ps *ProjectService) TaskByID(ctx context.Context, id int64) (entity.Task, error) {
 	user := entity.AuthUser(ctx)
 
-	task, err := us.task.TaskByID(ctx, id)
+	task, err := ps.task.TaskByID(ctx, id)
 	if err != nil {
 		return entity.Task{}, err
 	}
@@ -135,8 +135,8 @@ func (us *ProjectService) TaskByID(ctx context.Context, id int64) (entity.Task, 
 	return task, nil
 }
 
-func (us *ProjectService) ProjectTasks(ctx context.Context, projectID int64) ([]entity.Task, error) {
-	project, err := us.project.ProjectByID(ctx, projectID)
+func (ps *ProjectService) ProjectTasks(ctx context.Context, projectID int64) ([]entity.Task, error) {
+	project, err := ps.project.ProjectByID(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func (us *ProjectService) ProjectTasks(ctx context.Context, projectID int64) ([]
 		return nil, fmt.Errorf("%w: not your project", entity.ErrForbidden)
 	}
 
-	tasks, err := us.task.ProjectTasks(ctx, projectID)
+	tasks, err := ps.task.ProjectTasks(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
@@ -155,10 +155,10 @@ func (us *ProjectService) ProjectTasks(ctx context.Context, projectID int64) ([]
 	return tasks, nil
 }
 
-func (us *ProjectService) UserTasks(ctx context.Context) ([]entity.Task, error) {
+func (ps *ProjectService) UserTasks(ctx context.Context) ([]entity.Task, error) {
 	user := entity.AuthUser(ctx)
 
-	tasks, err := us.task.UserTasks(ctx, user.ID)
+	tasks, err := ps.task.UserTasks(ctx, user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -166,8 +166,8 @@ func (us *ProjectService) UserTasks(ctx context.Context) ([]entity.Task, error) 
 	return tasks, nil
 }
 
-func (us *ProjectService) AddProjectMember(ctx context.Context, code string) error {
-	err := us.project.AddProjectMember(ctx, code)
+func (ps *ProjectService) AddProjectMember(ctx context.Context, code string) error {
+	err := ps.project.AddProjectMember(ctx, code)
 	if err != nil {
 		return err
 	}
@@ -175,10 +175,10 @@ func (us *ProjectService) AddProjectMember(ctx context.Context, code string) err
 	return nil
 }
 
-func (us *ProjectService) InviteMemberRequest(ctx context.Context, projectID int64, email string) error {
+func (ps *ProjectService) InviteMemberRequest(ctx context.Context, projectID int64, email string) error {
 	requester := entity.AuthUser(ctx)
 
-	project, err := us.project.ProjectByID(ctx, projectID)
+	project, err := ps.project.ProjectByID(ctx, projectID)
 	if err != nil {
 		return err
 	}
@@ -187,19 +187,19 @@ func (us *ProjectService) InviteMemberRequest(ctx context.Context, projectID int
 		return fmt.Errorf("%w: not your project", entity.ErrForbidden)
 	}
 
-	user, err := us.user.UserByEmail(ctx, email)
+	user, err := ps.user.UserByEmail(ctx, email)
 	if err != nil {
 		return err
 	}
 
 	code := uuid.NewString()
 
-	err = us.project.SaveInvitationCode(ctx, code, user.ID, projectID)
+	err = ps.project.SaveInvitationCode(ctx, code, user.ID, projectID)
 	if err != nil {
 		return err
 	}
 
-	err = us.SendInvite(ctx, email, code, project.Name)
+	err = ps.SendInvite(ctx, email, code, project.Name)
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func (us *ProjectService) InviteMemberRequest(ctx context.Context, projectID int
 	return nil
 }
 
-func (us *ProjectService) SendInvite(ctx context.Context, email string, code string, projectName string) error {
+func (ps *ProjectService) SendInvite(ctx context.Context, email string, code string, projectName string) error {
 	message := map[string]string{
 		"subject":  "Invitation",
 		"receiver": email,
@@ -224,7 +224,7 @@ func (us *ProjectService) SendInvite(ctx context.Context, email string, code str
 		Value: b,
 	}
 
-	_, err = us.kafka.WriteMessages(msg)
+	_, err = ps.kafka.WriteMessages(msg)
 	if err != nil {
 		return err
 	}

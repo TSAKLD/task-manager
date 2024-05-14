@@ -13,6 +13,7 @@ type User struct {
 	Email      string    `json:"email"`
 	CreatedAt  time.Time `json:"created_at"`
 	IsVerified bool      `json:"is_verified"`
+	VipStatus  string    `json:"vip_status"`
 }
 
 func AuthUser(ctx context.Context) User {

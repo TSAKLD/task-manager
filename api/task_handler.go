@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"restAPI/entity"
 	"strconv"
@@ -50,7 +49,7 @@ func (h *TaskHandler) TaskByID(w http.ResponseWriter, r *http.Request) {
 	qID := r.PathValue("id")
 	id, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 
@@ -69,7 +68,7 @@ func (h *TaskHandler) ProjectTasks(w http.ResponseWriter, r *http.Request) {
 
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 

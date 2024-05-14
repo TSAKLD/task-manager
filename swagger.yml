@@ -1,0 +1,441 @@
+openapi: 3.0.0
+info:
+  title: Task Manager
+  version: 3.1.6
+servers:
+  - url: http://localhost:8080/
+    description: Dev server
+paths:
+  /users:
+    post:
+      summary: Register User
+      tags:
+        - Users
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserToCreate"
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          description: bad request
+        '500':
+          description: internal server error
+  /users/{id}:
+    get:
+      summary: User by ID
+      tags:
+        - Users
+      operationId: getUserByID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of user you are looking for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with user received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          description: bad request
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+    delete:
+      summary: Delete user by ID
+      tags:
+        - Users
+      operationId: deleteUserByID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of user you are deleting
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with user delete
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+
+  /projects:
+    post:
+      summary: Create Project
+      tags:
+        - Projects
+      operationId: createProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectToCreate"
+      responses:
+        '201':
+          description: Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        '400':
+          description: bad request
+        '500':
+          description: internal server error
+    get:
+      summary: User projects
+      tags:
+        - Projects
+      operationId: getUserProjects
+      responses:
+        '200':
+          description: Successful response with project received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Projects"
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+  /projects/{id}:
+    get:
+      summary: Project by ID
+      tags:
+        - Projects
+      operationId: getProjectByID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of project you are looking for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with project received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+        '400':
+          description: bad request
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+    delete:
+      summary: Delete project by ID
+      tags:
+        - Projects
+      operationId: deleteProjectByID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of project you are deleting
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with project delete
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+
+  /projects/{project_id}/users:
+    get:
+      summary: Users in project
+      tags:
+        - Users
+      operationId: getUsersInProject
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: ID of project you are looking users in
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with users received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Users"
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+
+  /tasks:
+    post:
+      summary: Create task
+      tags:
+        - Tasks
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskToCreate"
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+    get:
+      summary: User tasks
+      tags:
+        - Tasks
+      operationId: getUserTasks
+      responses:
+        '200':
+          description: Successful response with tasks received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tasks"
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+  /tasks/{id}:
+    get:
+      summary: Task by ID
+      tags:
+        - Projects
+      operationId: getTaskByID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of task you are looking for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with task received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+  /projects/{project_id}/tasks:
+    get:
+      summary: Tasks in project
+      tags:
+        - Tasks
+      operationId: getTasksInProject
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          description: ID of project you are looking tasks in
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with tasks received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tasks"
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - created_at
+        - is_verified
+        - vip_status
+      properties:
+        id:
+          type: integer
+          example: 15
+        name:
+          type: string
+          example: Adam
+        email:
+          type: string
+          example: kuroakan@gmail.com
+        created_at:
+          type: string
+          format: 2024-03-11T21:54:28.083Z
+          example: 2024-03-11T21:54:28.083Z
+        is_verified:
+          type: boolean
+          enum:
+            - true
+            - false
+        vip_status:
+          type: string
+          enum:
+            - active
+            - inactive
+          example: active
+    Users:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    UserToCreate:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: Adam
+        email:
+          type: string
+          example: kuroakan@gmail.com
+        password:
+          type: string
+          example: qwerty123
+
+    Project:
+      type: object
+      required:
+        - id
+        - name
+        - user_id
+        - created_at
+      properties:
+        id:
+          type: integer
+          example: 15
+        name:
+          type: string
+          example: Project X
+        user_id:
+          type: integer
+          example: 4
+        created_at:
+          type: string
+          format: 2024-05-15
+    Projects:
+      type: array
+      items:
+        $ref: "#/components/schemas/Project"
+
+    ProjectToCreate:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          example: 15
+
+    Task:
+      type: object
+      required:
+        - id
+        - name
+        - project_id
+        - user_id
+        - created_at
+        - description
+      properties:
+        id:
+          type: integer
+          example: 15
+        name:
+          type: string
+          example: Project X
+        project_id:
+          type: integer
+          example: 2
+        user_id:
+          type: integer
+          example: 4
+        created_at:
+          type: string
+          format: 2024-05-15
+        description:
+          type: string
+          example: Add validation to...
+
+    TaskToCreate:
+      type: object
+      required:
+        - name
+        - project_id
+        - description
+      properties:
+        name:
+          type: string
+          example: Project X
+        project_id:
+          type: integer
+          example: 2
+        description:
+          type: string
+          example: Add validation to...
+
+    Tasks:
+      type: array
+      items:
+        $ref: "#/components/schemas/Task"

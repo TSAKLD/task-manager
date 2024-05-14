@@ -33,8 +33,8 @@ func NewAuthService(auth AuthRepository, user UserRepository, kafkaConn *kafka.C
 	}
 }
 
-func (us *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCreate) (entity.User, error) {
-	_, err := us.user.UserByEmail(ctx, userTC.Email)
+func (as *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCreate) (entity.User, error) {
+	_, err := as.user.UserByEmail(ctx, userTC.Email)
 	if err == nil {
 		return entity.User{}, fmt.Errorf("email %s already exist", userTC.Email)
 	}
@@ -47,7 +47,7 @@ func (us *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCre
 		IsVerified: false,
 	}
 
-	user, err = us.user.CreateUser(ctx, user)
+	user, err = as.user.CreateUser(ctx, user)
 	if err != nil {
 		return entity.User{}, err
 	}
@@ -56,12 +56,12 @@ func (us *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCre
 
 	code := uuid.NewString()
 
-	err = us.auth.SaveVerificationCode(ctx, code, user.ID)
+	err = as.auth.SaveVerificationCode(ctx, code, user.ID)
 	if err != nil {
 		return entity.User{}, err
 	}
 
-	err = us.SendVerificationLink(ctx, code, user.Email)
+	err = as.SendVerificationLink(ctx, code, user.Email)
 	if err != nil {
 		return entity.User{}, err
 	}
@@ -69,8 +69,8 @@ func (us *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCre
 	return user, nil
 }
 
-func (us *AuthService) Login(ctx context.Context, email string, password string) (uuid.UUID, error) {
-	user, err := us.auth.UserByEmailAndPassword(ctx, email, password)
+func (as *AuthService) Login(ctx context.Context, email string, password string) (uuid.UUID, error) {
+	user, err := as.auth.UserByEmailAndPassword(ctx, email, password)
 	if err != nil {
 		if errors.Is(err, entity.ErrNotFound) {
 			return uuid.UUID{}, entity.ErrUnauthorized
@@ -87,7 +87,7 @@ func (us *AuthService) Login(ctx context.Context, email string, password string)
 
 	createdAt := time.Now()
 
-	err = us.auth.CreateSession(ctx, sessionID, user.ID, createdAt)
+	err = as.auth.CreateSession(ctx, sessionID, user.ID, createdAt)
 	if err != nil {
 		return uuid.UUID{}, err
 	}
@@ -95,15 +95,15 @@ func (us *AuthService) Login(ctx context.Context, email string, password string)
 	return sessionID, nil
 }
 
-func (us *AuthService) UserBySessionID(ctx context.Context, sessionID string) (entity.User, error) {
-	return us.auth.UserBySessionID(ctx, sessionID)
+func (as *AuthService) UserBySessionID(ctx context.Context, sessionID string) (entity.User, error) {
+	return as.auth.UserBySessionID(ctx, sessionID)
 }
 
-func (us *AuthService) Verify(ctx context.Context, code string) error {
-	return us.auth.VerifyUser(ctx, code)
+func (as *AuthService) Verify(ctx context.Context, code string) error {
+	return as.auth.VerifyUser(ctx, code)
 }
 
-func (us *AuthService) SendVerificationLink(ctx context.Context, code string, email string) error {
+func (as *AuthService) SendVerificationLink(ctx context.Context, code string, email string) error {
 	message := map[string]string{
 		"subject":  "Verification",
 		"receiver": email,
@@ -120,7 +120,7 @@ func (us *AuthService) SendVerificationLink(ctx context.Context, code string, em
 		Value: b,
 	}
 
-	_, err = us.kafka.WriteMessages(msg)
+	_, err = as.kafka.WriteMessages(msg)
 	if err != nil {
 		return err
 	}

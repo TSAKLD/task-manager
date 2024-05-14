@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"restAPI/entity"
@@ -68,7 +67,7 @@ func (h *ProjectHandler) ProjectByID(w http.ResponseWriter, r *http.Request) {
 	qID := r.PathValue("id")
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 
@@ -87,7 +86,7 @@ func (h *ProjectHandler) DeleteProject(w http.ResponseWriter, r *http.Request) {
 	qID := r.PathValue("id")
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 

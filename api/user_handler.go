@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"restAPI/entity"
 	"strconv"
@@ -30,7 +29,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 
@@ -50,7 +49,7 @@ func (h *UserHandler) UserByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 
@@ -69,7 +68,7 @@ func (h *UserHandler) ProjectUsers(w http.ResponseWriter, r *http.Request) {
 
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(ctx, w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, entity.ErrBadRequest)
 		return
 	}
 
