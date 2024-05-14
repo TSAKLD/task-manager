@@ -225,9 +225,5 @@ func (ps *ProjectService) SendInvite(ctx context.Context, email string, code str
 	}
 
 	_, err = ps.kafka.WriteMessages(msg)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
