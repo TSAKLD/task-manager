@@ -37,13 +37,13 @@ func (h *ProjectHandler) CreateProject(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&project)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
 	project, err = h.project.CreateProject(ctx, project)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -55,7 +55,7 @@ func (h *ProjectHandler) UserProjects(w http.ResponseWriter, r *http.Request) {
 
 	projects, err := h.project.UserProjects(ctx)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -68,13 +68,13 @@ func (h *ProjectHandler) ProjectByID(w http.ResponseWriter, r *http.Request) {
 	qID := r.PathValue("id")
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	project, err := h.project.ProjectByID(ctx, projectID)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -87,13 +87,13 @@ func (h *ProjectHandler) DeleteProject(w http.ResponseWriter, r *http.Request) {
 	qID := r.PathValue("id")
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	err = h.project.DeleteProject(ctx, projectID)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -112,7 +112,7 @@ func (h *ProjectHandler) AcceptProjectInvitation(w http.ResponseWriter, r *http.
 
 	err := h.project.AddProjectMember(ctx, code)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -120,18 +120,18 @@ func (h *ProjectHandler) AcceptProjectInvitation(w http.ResponseWriter, r *http.
 }
 
 func (h *ProjectHandler) InviteMember(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var request InviteMemberRequest
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
-	ctx := r.Context()
-
 	err = h.project.InviteMemberRequest(ctx, request.ProjectID, request.Email)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 

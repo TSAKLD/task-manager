@@ -30,13 +30,13 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	err = h.user.DeleteUser(ctx, id)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -50,13 +50,13 @@ func (h *UserHandler) UserByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	user, err := h.user.UserByID(ctx, id)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -69,13 +69,13 @@ func (h *UserHandler) ProjectUsers(w http.ResponseWriter, r *http.Request) {
 
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	users, err := h.user.ProjectUsers(ctx, projectID)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 

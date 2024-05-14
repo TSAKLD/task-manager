@@ -31,13 +31,13 @@ func (h *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&cTask)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
 	task, err := h.task.CreateTask(ctx, cTask)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -50,13 +50,13 @@ func (h *TaskHandler) TaskByID(w http.ResponseWriter, r *http.Request) {
 	qID := r.PathValue("id")
 	id, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	task, err := h.task.TaskByID(ctx, id)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -69,13 +69,13 @@ func (h *TaskHandler) ProjectTasks(w http.ResponseWriter, r *http.Request) {
 
 	projectID, err := strconv.ParseInt(qID, 10, 64)
 	if err != nil {
-		sendError(w, errors.New("'id' must be an integer"))
+		sendError(ctx, w, errors.New("'id' must be an integer"))
 		return
 	}
 
 	tasks, err := h.task.ProjectTasks(ctx, projectID)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -87,7 +87,7 @@ func (h *TaskHandler) UserTasks(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := h.task.UserTasks(ctx)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 

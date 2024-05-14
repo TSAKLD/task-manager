@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
+	"os"
 	"restAPI/api"
 	"restAPI/bootstrap"
 	"restAPI/repository"
@@ -11,31 +12,36 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+
 	cfg, err := bootstrap.NewConfig()
 	if err != nil {
-		log.Fatal("Problem with config load: ", err)
+		logger.Error("Problem with config load: ", "error", err)
+		return
 	}
 
 	errorList := cfg.Validate()
 	if errorList != nil {
-		log.Fatal("Problem with config validation: ", errorList)
+		logger.Error("Config validation error ", "error", err)
+		return
 	}
 
 	kafkaConn, err := bootstrap.KafkaConnect(cfg.KafkaAddr, cfg.KafkaTopic)
 	if err != nil {
-		log.Fatal("Problem with Kafka connection: ", err)
+		logger.Error("Problem with Kafka connection", "error", err)
 	}
 	defer kafkaConn.Close()
 
-	log.Println("kafka connection status: OK")
+	logger.Info("kafka connection status: OK")
 
 	db, err := bootstrap.DBConnect(cfg)
 	if err != nil {
-		log.Fatal("Problem with Postgres connection: ", err)
+		logger.Error("Problem with Postgres connection", "error", err)
+		return
 	}
 	defer db.Close()
 
-	log.Println("postgres DB connection status: OK")
+	logger.Info("postgres DB connection status: OK")
 
 	projRepo := repository.NewProjectRepository(db)
 	userRepo := repository.NewUserRepository(db)
@@ -44,7 +50,8 @@ func main() {
 
 	client, err := bootstrap.RedisConnect(cfg.RedisAddr)
 	if err != nil {
-		log.Fatal("Problem with Redis connection: ", err)
+		logger.Error("Problem with Redis connection", "error", err)
+		return
 	}
 	defer client.Close()
 
@@ -59,15 +66,15 @@ func main() {
 	userHandler := api.NewUserHandler(userServ)
 	authHandler := api.NewAuthHandler(authServ)
 
-	mw := api.NewMiddleware(authServ)
+	mw := api.NewMiddleware(authServ, logger)
 
 	server := api.NewServer(taskHandler, projectHandler, userHandler, authHandler, cfg.HTTPPort, mw)
 
 	go func() {
 		for {
-			err := userServ.SendVIPNotification(context.Background())
+			err := userServ.SendVIPNotification(context.Background(), *logger)
 			if err != nil {
-				log.Println(err)
+				logger.Error("Notification Sender error", "error", err)
 			}
 
 			time.Sleep(time.Minute)
@@ -76,6 +83,7 @@ func main() {
 
 	err = server.Start()
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("server start error", "error", err)
+		return
 	}
 }

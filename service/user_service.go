@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/segmentio/kafka-go"
-	"log"
+	"log/slog"
 	"restAPI/entity"
 )
 
@@ -89,7 +89,7 @@ func (us *UserService) ProjectUsers(ctx context.Context, projectID int64) ([]ent
 	return users, nil
 }
 
-func (us *UserService) SendVIPNotification(ctx context.Context) error {
+func (us *UserService) SendVIPNotification(ctx context.Context, l slog.Logger) error {
 	ntf := entity.Notification{
 		Subject:  "status update",
 		Receiver: "",
@@ -114,7 +114,7 @@ func (us *UserService) SendVIPNotification(ctx context.Context) error {
 			return err
 		}
 
-		log.Println(fmt.Sprintf("%s: status update : %s", ntf.Receiver, ntf.Message))
+		l.Info(fmt.Sprintf("%s: status update : %s", ntf.Receiver, ntf.Message))
 	}
 
 	return nil

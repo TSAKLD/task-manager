@@ -1,9 +1,9 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"restAPI/entity"
 )
@@ -13,8 +13,10 @@ type Error struct {
 }
 
 // sendError sending response with error based on error + status code.
-func sendError(w http.ResponseWriter, err error) {
-	log.Println(err)
+func sendError(ctx context.Context, w http.ResponseWriter, err error) {
+	l := entity.CtxLogger(ctx)
+
+	l.Error("API error", "error", err)
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -33,7 +35,7 @@ func sendError(w http.ResponseWriter, err error) {
 
 	err = json.NewEncoder(w).Encode(Error{Error: err.Error()})
 	if err != nil {
-		log.Println(err)
+		l.Error("API error", "error", err)
 	}
 }
 

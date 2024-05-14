@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"log"
 	"restAPI/entity"
 	"time"
 )
@@ -23,6 +22,8 @@ func NewRedisCache(user *UserRepository, client *redis.Client) *RedisCache {
 }
 
 func (r *RedisCache) CreateUser(ctx context.Context, u entity.User) (entity.User, error) {
+	l := entity.CtxLogger(ctx)
+
 	user, err := r.user.CreateUser(ctx, u)
 	if err != nil {
 		return entity.User{}, err
@@ -32,13 +33,13 @@ func (r *RedisCache) CreateUser(ctx context.Context, u entity.User) (entity.User
 
 	value, err := json.Marshal(user)
 	if err != nil {
-		log.Println(err)
+		l.Error("redis error", "error", err)
 		return user, nil
 	}
 
 	err = r.client.Set(ctx, key, string(value), time.Minute).Err()
 	if err != nil {
-		log.Println(err)
+		l.Error("redis error", "error", err)
 		return user, nil
 	}
 

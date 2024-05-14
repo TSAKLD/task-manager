@@ -33,13 +33,13 @@ func (h *AuthHandler) Registration(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
 	user, err = h.auth.RegisterUser(ctx, user)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -53,13 +53,13 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
 	sessionID, err := h.auth.Login(ctx, user.Email, user.Password)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
@@ -83,7 +83,7 @@ func (h *AuthHandler) Verify(w http.ResponseWriter, r *http.Request) {
 
 	err := h.auth.Verify(ctx, code)
 	if err != nil {
-		sendError(w, err)
+		sendError(ctx, w, err)
 		return
 	}
 
