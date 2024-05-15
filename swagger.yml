@@ -79,6 +79,29 @@ paths:
         '500':
           description: internal server error
 
+  /users/verify:
+    get:
+      summary: User verification
+      tags:
+        - Auth
+      operationId: verifyUser
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+            example: 51e42fc3-812a-4083-99f7-ba4e16ff8fed
+          required: true
+      responses:
+        '200':
+          description: Successfully verified
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '500':
+          description: internal server error
+
   /projects:
     post:
       summary: Create Project
@@ -196,6 +219,63 @@ paths:
           description: not found
         '500':
           description: internal server error
+  /projects/invite:
+    post:
+      summary: Invite user to project
+      tags:
+        - Projects
+      operationId: inviteToProject
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - project_id
+              properties:
+                email:
+                  type: string
+                  example: "asdwer12334@gmail.com"
+                project_id:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Invited successfully
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+    get:
+      summary: Accept invitation to Project
+      tags:
+        - Projects
+      operationId: acceptInvitationToProject
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+            example: 51e42fc3-812a-4083-99f7-ba4e16ff8fed
+          required: true
+      responses:
+        '200':
+          description: Invited successfully
+          content:
+            'text/plain':
+              example: "Invited successfully"
+        '404':
+          description: not found
+        '500':
+          description: internal server error
+
+
 
   /tasks:
     post:
@@ -296,6 +376,44 @@ paths:
           description: not found
         '500':
           description: internal server error
+
+  /signin:
+    post:
+      summary: Signing into account
+      tags:
+        - Auth
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "asdwer12334@gmail.com"
+                password:
+                  type: string
+                  example: qwerty123
+      responses:
+        '200':
+          description: Signed in
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: 51e42fc3-812a-4083-99f7-ba4e16ff8fed
+        '400':
+          description: bad request
+        '403':
+          description: forbidden
+        '500':
+          description: internal server error
+
 
 
 components:
