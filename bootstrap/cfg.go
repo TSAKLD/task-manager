@@ -2,23 +2,21 @@ package bootstrap
 
 import (
 	"errors"
+	"github.com/Netflix/go-env"
 	"github.com/joho/godotenv"
-	"os"
+	"log"
 )
 
 type Config struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-
-	HTTPPort string
-
-	RedisAddr string
-
-	KafkaAddr  string
-	KafkaTopic string
+	DBHost     string `env:"DB_HOST"`
+	DBPort     string `env:"DB_PORT"`
+	DBUser     string `env:"DB_USER"`
+	DBPassword string `env:"DB_PASS"`
+	DBName     string `env:"DB_NAME"`
+	HTTPPort   string `env:"HTTP_PORT"`
+	RedisAddr  string `env:"REDIS_ADDR"`
+	KafkaAddr  string `env:"KAFKA_ADDR"`
+	KafkaTopic string `env:"KAFKA_TOPIC"`
 }
 
 func NewConfig() (*Config, error) {
@@ -27,19 +25,14 @@ func NewConfig() (*Config, error) {
 		return nil, err
 	}
 
-	return &Config{
-		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PORT"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASS"),
-		DBName:     os.Getenv("DB_NAME"),
-		HTTPPort:   os.Getenv("HTTP_PORT"),
+	var config Config
 
-		RedisAddr: os.Getenv("REDIS_ADDR"),
+	_, err = env.UnmarshalFromEnviron(&config)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		KafkaAddr:  os.Getenv("KAFKA_ADDR"),
-		KafkaTopic: os.Getenv("KAFKA_TOPIC"),
-	}, nil
+	return &config, nil
 }
 
 func (c *Config) Validate() []error {
