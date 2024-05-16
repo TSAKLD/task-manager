@@ -116,7 +116,7 @@ func (as *AuthService) Verify(ctx context.Context, code string) error {
 	return as.auth.VerifyUser(ctx, code)
 }
 
-func (as *AuthService) SendVerificationLink(ctx context.Context, code string, email string) error {
+func (as *AuthService) SendVerificationLink(_ context.Context, code string, email string) error {
 	message := map[string]string{
 		"subject":  "Verification",
 		"receiver": email,
