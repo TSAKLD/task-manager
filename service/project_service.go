@@ -28,14 +28,16 @@ type ProjectRepository interface {
 }
 
 type ProjectService struct {
+	auth    AuthRepository
 	project ProjectRepository
 	user    UserRepository
 	task    TaskRepository
 	kafka   *kafka.Conn
 }
 
-func NewProjectRepository(project ProjectRepository, task TaskRepository, user UserRepository, kafkaConn *kafka.Conn) *ProjectService {
+func NewProjectRepository(auth AuthRepository, project ProjectRepository, task TaskRepository, user UserRepository, kafkaConn *kafka.Conn) *ProjectService {
 	return &ProjectService{
+		auth:    auth,
 		project: project,
 		user:    user,
 		task:    task,
@@ -187,7 +189,7 @@ func (ps *ProjectService) InviteMemberRequest(ctx context.Context, projectID int
 		return fmt.Errorf("%w: not your project", entity.ErrForbidden)
 	}
 
-	user, err := ps.user.UserByEmail(ctx, email)
+	user, err := ps.auth.UserByEmail(ctx, email)
 	if err != nil {
 		return err
 	}

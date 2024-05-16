@@ -64,20 +64,6 @@ func (r *RedisCache) UserByID(ctx context.Context, id int64) (u entity.User, err
 	return r.user.UserByID(ctx, id)
 }
 
-func (r *RedisCache) UserByEmail(ctx context.Context, email string) (u entity.User, err error) {
-	key := fmt.Sprintf("user:%s", email)
-
-	result, err := r.client.Get(ctx, key).Result()
-	if err == nil {
-		err = json.Unmarshal([]byte(result), &u)
-		if err == nil {
-			return u, nil
-		}
-	}
-
-	return r.user.UserByEmail(ctx, email)
-}
-
 func (r *RedisCache) UsersToSendVIP(ctx context.Context) (users []entity.User, err error) {
 	return r.user.UsersToSendVIP(ctx)
 }

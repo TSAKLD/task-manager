@@ -53,21 +53,6 @@ func (r *UserRepository) UserByID(ctx context.Context, id int64) (u entity.User,
 	return u, nil
 }
 
-func (r *UserRepository) UserByEmail(ctx context.Context, email string) (u entity.User, err error) {
-	q := "SELECT id, name, email, created_at, is_verified, vip_status FROM users WHERE email = $1"
-
-	err = r.db.QueryRowContext(ctx, q, email).Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt, &u.IsVerified, &u.VipStatus)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return entity.User{}, entity.ErrNotFound
-		}
-
-		return u, err
-	}
-
-	return u, nil
-}
-
 func (r *UserRepository) UsersToSendVIP(ctx context.Context) (users []entity.User, err error) {
 	q := `SELECT u.id, u.name, u.email, u.created_at, u.is_verified, u.vip_status 
 	FROM users u LEFT JOIN email_notifications en ON u.email = en.email 

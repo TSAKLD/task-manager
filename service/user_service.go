@@ -14,7 +14,6 @@ type UserRepository interface {
 	DeleteUser(ctx context.Context, id int64) error
 
 	UserByID(ctx context.Context, id int64) (u entity.User, err error)
-	UserByEmail(ctx context.Context, email string) (u entity.User, err error)
 	UsersToSendVIP(ctx context.Context) (users []entity.User, err error)
 	ProjectUsers(ctx context.Context, projectID int64) (users []entity.User, err error)
 

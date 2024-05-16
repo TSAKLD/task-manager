@@ -35,7 +35,7 @@ func NewAuthService(auth AuthRepository, user UserRepository, kafkaConn *kafka.C
 }
 
 func (as *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCreate) (entity.User, error) {
-	_, err := as.user.UserByEmail(ctx, userTC.Email)
+	_, err := as.auth.UserByEmail(ctx, userTC.Email)
 	if err == nil {
 		return entity.User{}, fmt.Errorf("email %s already exist", userTC.Email)
 	}

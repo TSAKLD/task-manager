@@ -59,7 +59,7 @@ func main() {
 
 	userServ := service.NewUserService(cache, authRepo, projRepo, kafkaConn)
 	authServ := service.NewAuthService(authRepo, userRepo, kafkaConn)
-	projServ := service.NewProjectRepository(projRepo, taskRepo, userRepo, kafkaConn)
+	projServ := service.NewProjectRepository(authRepo, projRepo, taskRepo, userRepo, kafkaConn)
 
 	taskHandler := api.NewTaskHandler(projServ)
 	projectHandler := api.NewProjectHandler(projServ)
