@@ -7,12 +7,13 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
+	"golang.org/x/crypto/bcrypt"
 	"restAPI/entity"
 	"time"
 )
 
 type AuthRepository interface {
-	UserByEmailAndPassword(ctx context.Context, email string, password string) (u entity.User, err error)
+	UserByEmail(ctx context.Context, email string) (u entity.User, err error)
 	CreateSession(ctx context.Context, sessionID uuid.UUID, userID int64, createdAt time.Time) error
 	UserBySessionID(ctx context.Context, sessionID string) (u entity.User, err error)
 	SaveVerificationCode(ctx context.Context, code string, userID int64) error
@@ -39,9 +40,14 @@ func (as *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCre
 		return entity.User{}, fmt.Errorf("email %s already exist", userTC.Email)
 	}
 
+	hash, err := bcrypt.GenerateFromPassword([]byte(userTC.Password), 10)
+	if err != nil {
+		return entity.User{}, err
+	}
+
 	user := entity.User{
 		Name:       userTC.Name,
-		Password:   userTC.Password,
+		Password:   string(hash),
 		Email:      userTC.Email,
 		CreatedAt:  time.Now(),
 		IsVerified: false,
@@ -52,7 +58,7 @@ func (as *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCre
 		return entity.User{}, err
 	}
 
-	userTC.Password = ""
+	user.Password = ""
 
 	code := uuid.NewString()
 
@@ -70,7 +76,7 @@ func (as *AuthService) RegisterUser(ctx context.Context, userTC entity.UserToCre
 }
 
 func (as *AuthService) Login(ctx context.Context, email string, password string) (uuid.UUID, error) {
-	user, err := as.auth.UserByEmailAndPassword(ctx, email, password)
+	user, err := as.auth.UserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, entity.ErrNotFound) {
 			return uuid.UUID{}, entity.ErrUnauthorized
@@ -78,6 +84,13 @@ func (as *AuthService) Login(ctx context.Context, email string, password string)
 
 		return uuid.UUID{}, err
 	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return uuid.UUID{}, entity.ErrUnauthorized
+	}
+
+	user.Password = ""
 
 	if !user.IsVerified {
 		return uuid.UUID{}, fmt.Errorf("%w: not verified, check your email", entity.ErrUnauthorized)

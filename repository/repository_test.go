@@ -32,7 +32,7 @@ func TestRepository_CreateUser(t *testing.T) {
 	require.NoError(t, err)
 
 	// Get user by email && password
-	user2, err := authRepo.UserByEmailAndPassword(eCtx, user.Email, user.Password)
+	user2, err := authRepo.UserByEmail(eCtx, user.Email, user.Password)
 	require.NoError(t, err)
 
 	user.Password = ""
@@ -68,7 +68,7 @@ func TestRepository_Users_Error(t *testing.T) {
 	authRepo := NewAuthRepository(db)
 	userRepo := NewUserRepository(db)
 
-	_, err := authRepo.UserByEmailAndPassword(eCtx, uuid.NewString(), uuid.NewString())
+	_, err := authRepo.UserByEmail(eCtx, uuid.NewString(), uuid.NewString())
 	require.ErrorIs(t, err, entity.ErrNotFound)
 
 	_, err = userRepo.UserByID(eCtx, time.Now().UnixNano())
@@ -88,7 +88,7 @@ func TestRepository_Users_Error(t *testing.T) {
 	_, err = userRepo.UsersToSendVIP(eCtx)
 	require.Error(t, err)
 
-	_, err = authRepo.UserByEmailAndPassword(eCtx, uuid.NewString(), uuid.NewString())
+	_, err = authRepo.UserByEmail(eCtx, uuid.NewString(), uuid.NewString())
 	require.Error(t, err)
 
 	_, err = userRepo.UserByID(eCtx, time.Now().UnixNano())

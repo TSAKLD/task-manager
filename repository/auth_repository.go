@@ -17,10 +17,10 @@ func NewAuthRepository(db *sql.DB) *AuthRepository {
 	return &AuthRepository{db: db}
 }
 
-func (r *AuthRepository) UserByEmailAndPassword(ctx context.Context, email string, password string) (u entity.User, err error) {
-	q := "SELECT id, name, email, created_at, is_verified FROM users WHERE email = $1 AND password = $2"
+func (r *AuthRepository) UserByEmail(ctx context.Context, email string) (u entity.User, err error) {
+	q := "SELECT id, name, email, password, created_at, is_verified FROM users WHERE email = $1"
 
-	err = r.db.QueryRowContext(ctx, q, email, password).Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt, &u.IsVerified)
+	err = r.db.QueryRowContext(ctx, q, email).Scan(&u.ID, &u.Name, &u.Email, &u.Password, &u.CreatedAt, &u.IsVerified)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return entity.User{}, entity.ErrNotFound
