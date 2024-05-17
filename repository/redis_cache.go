@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/redis/go-redis/v9"
-	"restAPI/entity"
+	"task-manager/entity"
 	"time"
 )
 

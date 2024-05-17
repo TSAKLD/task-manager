@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"net/http"
-	"restAPI/entity"
 	"strconv"
+	"task-manager/entity"
 )
 
 type UserService interface {

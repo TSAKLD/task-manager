@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"restAPI/entity"
+	"task-manager/entity"
 )
 
 type TaskRepository struct {

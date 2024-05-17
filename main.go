@@ -4,10 +4,10 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"restAPI/api"
-	"restAPI/bootstrap"
-	"restAPI/repository"
-	"restAPI/service"
+	"task-manager/api"
+	"task-manager/bootstrap"
+	"task-manager/repository"
+	"task-manager/service"
 	"time"
 )
 

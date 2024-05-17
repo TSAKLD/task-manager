@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/google/uuid"
-	"restAPI/entity"
+	"task-manager/entity"
 	"time"
 )
 

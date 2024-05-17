@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/segmentio/kafka-go"
 	"log/slog"
-	"restAPI/entity"
+	"task-manager/entity"
 )
 
 type UserRepository interface {

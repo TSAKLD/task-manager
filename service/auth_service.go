@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 	"golang.org/x/crypto/bcrypt"
-	"restAPI/entity"
+	"task-manager/entity"
 	"time"
 )
 

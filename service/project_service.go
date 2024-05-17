@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
-	"restAPI/entity"
+	"task-manager/entity"
 	"time"
 )
 

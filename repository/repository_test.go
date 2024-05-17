@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"os"
-	"restAPI/bootstrap"
-	"restAPI/entity"
+	"task-manager/bootstrap"
+	"task-manager/entity"
 	"testing"
 	"time"
 )

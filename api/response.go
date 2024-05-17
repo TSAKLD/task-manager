@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"restAPI/entity"
+	"task-manager/entity"
 )
 
 type Error struct {

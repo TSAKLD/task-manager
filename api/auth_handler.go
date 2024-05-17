@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"net/http"
-	"restAPI/entity"
+	"task-manager/entity"
 	"time"
 )
 

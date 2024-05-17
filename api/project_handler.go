@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"restAPI/entity"
 	"strconv"
+	"task-manager/entity"
 )
 
 type ProjectService interface {

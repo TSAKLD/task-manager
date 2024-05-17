@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"restAPI/entity"
 	"strconv"
+	"task-manager/entity"
 )
 
 type TaskService interface {
